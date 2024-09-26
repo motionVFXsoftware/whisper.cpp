@@ -3482,7 +3482,7 @@ bool ggml_backend_metal_supports_family(ggml_backend_t backend, int family) {
 
     struct ggml_backend_metal_context * ctx = (struct ggml_backend_metal_context *)backend->context;
 
-    return [ctx->device supportsFamily:(MTLGPUFamilyApple1 + family - 1)];
+    return [ctx->device supportsFamily:(MTLGPUFamilyApple1 + family - 1)] || [ctx->device supportsFamily:MTLGPUFamilyMetal3];
 }
 
 void ggml_backend_metal_capture_next_compute(ggml_backend_t backend) {
