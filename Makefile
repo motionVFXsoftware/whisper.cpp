@@ -3,12 +3,11 @@ BUILD_TARGETS = \
 	main \
 	bench \
 	quantize \
-	server \
-	tests/test-c.o
+	server
 
 # Binaries only useful for tests
 TEST_TARGETS = \
-	tests/test-backend-ops
+	tests/test-c.o
 
 # Deprecation aliases
 ifdef WHISPER_CUBLAS
@@ -513,9 +512,6 @@ ifdef GGML_CUDA
 	OBJ_GGML += ggml/src/ggml-cuda.o
 	OBJ_GGML += $(patsubst %.cu,%.o,$(wildcard ggml/src/ggml-cuda/*.cu))
 	OBJ_GGML += $(OBJ_CUDA_TMPL)
-
-	#OBJ_WHISPER += src/whisper-mel-cuda.o
-
 ifdef WHISPER_FATAL_WARNINGS
 	MK_NVCCFLAGS += -Werror all-warnings
 endif # WHISPER_FATAL_WARNINGS
@@ -624,10 +620,6 @@ ggml/src/ggml-cuda.o: \
 	ggml/src/ggml-common.h \
 	$(wildcard ggml/src/ggml-cuda/*.cuh)
 	$(NVCC_COMPILE)
-
-#src/whisper-mel-cuda.o: src/whisper-mel-cuda.cu src/whisper-mel-cuda.hpp
-#	$(NVCC) $(NVCCFLAGS) $(CPPFLAGS) -Xcompiler "$(CUDA_CXXFLAGS)" -c $< -o $@
-
 endif # GGML_CUDA
 
 ifdef GGML_VULKAN
@@ -905,10 +897,10 @@ ggml/src/ggml-alloc.o: \
 	$(CC)  $(CFLAGS)   -c $< -o $@
 
 ggml/src/ggml-backend.o: \
-	ggml/src/ggml-backend.c \
+	ggml/src/ggml-backend.cpp \
 	ggml/include/ggml.h \
 	ggml/include/ggml-backend.h
-	$(CC)  $(CFLAGS)   -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 ggml/src/ggml-quants.o: \
 	ggml/src/ggml-quants.c \
@@ -956,7 +948,6 @@ $(LIB_GGML_S): \
 
 src/whisper.o: \
 	src/whisper.cpp \
-	src/whisper-mel.hpp \
 	unicode.h \
 	include/whisper.h \
 	ggml/include/ggml.h \
@@ -1102,11 +1093,6 @@ tests: $(TEST_TARGETS)
 tests/test-c.o: tests/test-c.c include/whisper.h
 	$(CC) $(CFLAGS) -c $(filter-out %.h,$^) -o $@
 
-tests/test-backend-ops: tests/test-backend-ops.cpp \
-	$(OBJ_GGML)
-	$(CXX) $(CXXFLAGS) -c $< -o $(call GET_OBJ_FILE, $<)
-	$(CXX) $(CXXFLAGS) $(filter-out %.h $<,$^) $(call GET_OBJ_FILE, $<) -o $@ $(LDFLAGS)
-
 #
 # Audio samples
 #
@@ -1152,8 +1138,9 @@ samples:
 .PHONY: large-v1
 .PHONY: large-v2
 .PHONY: large-v3
+.PHONY: large-v3-turbo
 
-tiny.en tiny base.en base small.en small medium.en medium large-v1 large-v2 large-v3: main
+tiny.en tiny base.en base small.en small medium.en medium large-v1 large-v2 large-v3 large-v3-turbo: main
 	bash ./models/download-ggml-model.sh $@
 	@echo ""
 	@echo "==============================================="
