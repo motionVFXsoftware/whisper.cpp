@@ -101,6 +101,7 @@ extern "C" {
         WHISPER_AHEADS_LARGE_V1,
         WHISPER_AHEADS_LARGE_V2,
         WHISPER_AHEADS_LARGE_V3,
+        WHISPER_AHEADS_TURBO_V3,
     };
 
     typedef struct whisper_ahead {
